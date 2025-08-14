@@ -364,7 +364,42 @@ window.addEventListener('unhandledrejection', (e)=>{ logToServer({message: 'unha
   const mouseNDC = new THREE.Vector2(0,0); // center ray
     const groundY = -1.5;
     fetch('/assets/images').then(r=>r.json()).then((images)=>{
-      if (!Array.isArray(images) || images.length === 0) return;
+      if (!Array.isArray(images) || images.length === 0) {
+        console.warn('No images from server, using fallback list');
+        // Fallback hardcoded list for Vercel
+        const fallbackImages = [
+          '/images/Banks.png',
+          '/images/Brez.png', 
+          '/images/Doge.png',
+          '/images/Elon.png',
+          '/images/Fatass.png',
+          '/images/Ross.png',
+          '/images/TJR.png',
+          '/images/Tate.png',
+          '/images/Trump.png'
+        ];
+        loadCharacters(fallbackImages);
+        return;
+      }
+      loadCharacters(images);
+    }).catch(e => {
+      console.error('Error fetching images:', e);
+      // Fallback hardcoded list for Vercel
+      const fallbackImages = [
+        '/images/Banks.png',
+        '/images/Brez.png', 
+        '/images/Doge.png',
+        '/images/Elon.png',
+        '/images/Fatass.png',
+        '/images/Ross.png',
+        '/images/TJR.png',
+        '/images/Tate.png',
+        '/images/Trump.png'
+      ];
+      loadCharacters(fallbackImages);
+    });
+
+    function loadCharacters(images) {
   images.forEach((url, i)=>{
         texLoader.load(url, (tex)=>{
           if (tex.colorSpace !== undefined) tex.colorSpace = THREE.SRGBColorSpace;
@@ -436,7 +471,7 @@ window.addEventListener('unhandledrejection', (e)=>{ logToServer({message: 'unha
           heads.push({ mesh: plane, talk: (v)=>{ plane.scale.y = 1 + v*0.04; } });
         }, undefined, (e)=>console.warn('Failed to load image', url, e));
       });
-    }).catch(()=>{});
+    }
 
     // Hover label handling
     const hoverCanvas = document.createElement('canvas');
