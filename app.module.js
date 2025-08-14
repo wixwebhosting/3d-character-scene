@@ -287,14 +287,28 @@ window.addEventListener('unhandledrejection', (e)=>{ logToServer({message: 'unha
       window.addEventListener('click', startMusic, { once: true });
     }
     
-    // Walking sound using local audio file (public/walking.mp3)
+    // Walking sound using local audio file (walking.mp3)
   const walkingAudio = new Audio('walking.mp3');
     walkingAudio.loop = true;
     walkingAudio.volume = 0.6;
-    walkingAudio.addEventListener('error', ()=> console.warn('walking.mp3 not found or failed to load'));
+    walkingAudio.addEventListener('error', (e)=> {
+      console.warn('walking.mp3 not found or failed to load:', e);
+      console.log('Trying alternate path: /walking.mp3');
+      walkingAudio.src = '/walking.mp3';
+    });
+    walkingAudio.addEventListener('loadstart', ()=> console.log('Walking audio loading...'));
+    walkingAudio.addEventListener('canplay', ()=> console.log('Walking audio ready to play'));
+    
     // Prime audio permission on first click
   const primeWalk = () => {
-      walkingAudio.play().then(() => { walkingAudio.pause(); walkingAudio.currentTime = 0; }).catch(()=>{});
+      console.log('Priming walking audio...');
+      walkingAudio.play().then(() => { 
+        console.log('Walking audio primed successfully');
+        walkingAudio.pause(); 
+        walkingAudio.currentTime = 0; 
+      }).catch((e)=>{
+        console.warn('Failed to prime walking audio:', e);
+      });
       window.removeEventListener('keydown', primeWalk);
       window.removeEventListener('pointerdown', primeWalk);
     };
@@ -757,10 +771,18 @@ window.addEventListener('unhandledrejection', (e)=>{ logToServer({message: 'unha
       // Handle walking sound (loop while moving, cut off when stopped)
       if (moving !== isWalking) {
         isWalking = moving;
+        console.log('Walking state changed:', isWalking ? 'STARTED' : 'STOPPED');
         if (isWalking && !walkSoundPlaying) {
+          console.log('Starting walking sound...');
           walkingAudio.currentTime = 0; // start immediately
-          walkingAudio.play().then(()=>{ walkSoundPlaying = true; }).catch(()=>{});
+          walkingAudio.play().then(()=>{ 
+            console.log('Walking sound playing');
+            walkSoundPlaying = true; 
+          }).catch((e)=>{
+            console.warn('Failed to play walking sound:', e);
+          });
         } else if (!isWalking && walkSoundPlaying) {
+          console.log('Stopping walking sound...');
           walkingAudio.pause();
           walkingAudio.currentTime = 0; // hard cut
           walkSoundPlaying = false;
