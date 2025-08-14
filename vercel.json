@@ -2,8 +2,12 @@
   "version": 2,
   "builds": [
     {
-      "src": "server.js",
+      "src": "./server.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "./public/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -20,12 +24,8 @@
       "dest": "/server.js"
     },
     {
-      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|mp3|glb|gltf|bin))",
-      "dest": "/public/$1"
-    },
-    {
       "src": "/",
-      "dest": "/index.html"
+      "dest": "/server.js"
     }
   ]
 }
